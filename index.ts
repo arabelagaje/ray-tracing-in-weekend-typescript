@@ -4,6 +4,8 @@ import { Vector3 } from './src/Vector3.js';
 import { Color } from './src/Color.js';
 import { Point3 } from './src/Point3.js';
 
+console.time("Total time")
+
 const aspect_ratio = 16.0 / 9.0;
 const image_width = 400;
 const image_height = Math.floor(image_width / aspect_ratio);
@@ -47,3 +49,5 @@ function rayColor(r: Ray): Color {
 }
 
 fs.writeFileSync("./output/test.ppm", imgData)
+
+console.timeEnd("Total time")
