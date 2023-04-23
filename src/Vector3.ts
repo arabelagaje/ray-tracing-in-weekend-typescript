@@ -20,18 +20,6 @@ export class Vector3 {
         return this._z;
     }
 
-    get r(): number {
-        return this._x;
-    }
-
-    get g(): number {
-        return this._y;
-    }
-
-    get b(): number {
-        return this._z;
-    }
-
     set x(x: number) {
         this._x = x;
     }
