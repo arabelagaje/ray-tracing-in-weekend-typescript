@@ -40,12 +40,23 @@ for (let j = image_height - 1; j >= 0; --j) {
 }
 
 function rayColor(r: Ray): Color {
+    if (hit_sphere(new Point3(0, 0, -1), 0.5, r))
+        return new Color(1, 0, 0);
     const unit_direction = r.direction.getNormalized();
     const t = 0.5 * (unit_direction.y + 1.0);
     const startColor = new Color(1.0, 1.0, 1.0);
     const endColor = new Color(0.5, 0.7, 1.0);
     //(1.0-t) * startColor + t * endColor;
-    return Color.fromVector3(startColor.multiply(1-t).add(endColor.multiply(t)));
+    return Color.fromVector3(startColor.multiply(1 - t).add(endColor.multiply(t)));
+}
+
+function hit_sphere(center: Point3, radius: number, r: Ray) {
+    const oc = r.origin.subtract(center);
+    const a = r.direction.dot(r.direction);
+    const b = 2.0 * oc.dot(r.direction);
+    const c = oc.dot(oc) - radius * radius;
+    const discriminant = b * b - 4 * a * c;
+    return (discriminant > 0);
 }
 
 fs.writeFileSync("./output/test.ppm", imgData)

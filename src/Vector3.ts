@@ -84,4 +84,7 @@ export class Vector3 {
         return this.divide(this.length());
     }
 
+    dot(vector3: Vector3): number {
+        return (this._x * vector3.x) + (this._y * vector3.y) + (this._z * vector3.z);
+    }
 }

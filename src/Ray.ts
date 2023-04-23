@@ -23,6 +23,7 @@ export class Ray {
     }
 
     at(t:number):Point3 {
+        //origin + t * direction
        return this.origin.add(this.direction.multiply(t))
     }
 }
