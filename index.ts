@@ -3,6 +3,9 @@ import { Ray } from './src/Ray.js';
 import { Vector3 } from './src/Vector3.js';
 import { Color } from './src/Color.js';
 import { Point3 } from './src/Point3.js';
+import { Hitable } from './src/Hitable.js';
+import { HitableList } from './src/HitableList.js';
+import { Sphere } from './src/Sphere.js';
 
 console.time("Total time")
 
@@ -20,6 +23,9 @@ const vertical = new Vector3(0, viewport_height, 0);
 //origin - horizontal/2 - vertical/2 - Vector3(0, 0, focal_length);
 const lower_left_corner = origin.subtract(horizontal.divide(2)).subtract(vertical.divide(2)).subtract(new Vector3(0, 0, focal_length));
 
+const world = new HitableList();
+world.add(new Sphere(new Point3(0,0,-1), 0.5));
+world.add(new Sphere(new Point3(0,-100.5,-1), 100));
 
 // Render
 let imgData = "P3\n" + image_width + " " + image_height + "\n255\n";
@@ -30,23 +36,22 @@ for (let j = image_height - 1; j >= 0; --j) {
         const u = i / (image_width - 1);
         const v = j / (image_height - 1);
         //lower_left_corner + u*horizontal + v*vertical - origin
-        const r = new Ray(origin,
+        const ray = new Ray(origin,
             lower_left_corner.add(horizontal.multiply(u)).add(vertical.multiply(v)).subtract(origin));
-        const pixel_color = rayColor(r);
+        const pixel_color = rayColor(ray,world);
 
         pixel_color.multiplyBy(255.999);
         imgData += Math.floor(pixel_color.r) + ' ' + Math.floor(pixel_color.g) + ' ' + Math.floor(pixel_color.b) + "\n";
     }
 }
 
-function rayColor(r: Ray): Color {
-    let t = hit_sphere(new Point3(0, 0, -1), 0.5, r);
-    if (t > 0.0) {
-        const N = r.at(t).subtract(new Vector3(0, 0, -1)).getNormalized();
-        return Color.fromVector3(new Color(N.x + 1, N.y + 1, N.z + 1).multiply(0.5));
+function rayColor(ray: Ray, world:Hitable): Color {
+    const hitRecord = world.hit(ray, 0, Number.MAX_SAFE_INTEGER)
+    if(hitRecord.isHit){
+        return Color.fromVector3(hitRecord.normal.add(new Vector3(1,1,1)).multiply(0.5));
     }
-    const unit_direction = r.direction.getNormalized();
-    t = 0.5 * (unit_direction.y + 1.0);
+    const unit_direction = ray.direction.getNormalized();
+    const t = 0.5 * (unit_direction.y + 1.0);
     const startColor = new Color(1.0, 1.0, 1.0);
     const endColor = new Color(0.5, 0.7, 1.0);
     //(1.0-t) * startColor + t * endColor;
