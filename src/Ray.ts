@@ -11,7 +11,7 @@ export class Ray {
     }
 
     get direction(): Vector3 {
-        return this.direction;
+        return this._direction;
     }
 
     set origin(origin: Point3) {
@@ -19,7 +19,7 @@ export class Ray {
     }
 
     set direction(direction: Vector3) {
-        this.direction = direction;
+        this._direction = direction;
     }
 
     at(t:number):Point3 {
