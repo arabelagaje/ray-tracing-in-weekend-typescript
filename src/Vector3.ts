@@ -1,3 +1,5 @@
+import { Utils } from "./Utils.js";
+
 export class Vector3 {
     private _x: number;
     private _y: number;
@@ -86,5 +88,11 @@ export class Vector3 {
 
     dot(vector3: Vector3): number {
         return (this._x * vector3.x) + (this._y * vector3.y) + (this._z * vector3.z);
+    }
+
+    clamp(min:number, max:number){
+        this._x = Utils.clamp(this._x, 0, 0.9999)
+        this._y = Utils.clamp(this._y, 0, 0.9999)
+        this._z = Utils.clamp(this._z, 0, 0.9999)
     }
 }
