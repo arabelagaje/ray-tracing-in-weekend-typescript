@@ -23,4 +23,8 @@ export class Color extends Vector3 {
     set b(b: number) {
         this.z = b;
     }
+
+    static fromVector3(vector3: Vector3): Color {
+        return new Color(vector3.x, vector3.y, vector3.z);
+    }
 }
