@@ -40,10 +40,10 @@ for (let j = image_height - 1; j >= 0; --j) {
 }
 
 function rayColor(r: Ray): Color {
-    let t = hit_sphere(new Point3(0,0,-1), 0.5, r);
+    let t = hit_sphere(new Point3(0, 0, -1), 0.5, r);
     if (t > 0.0) {
-        const N = r.at(t).subtract(new Vector3(0,0,-1)).getNormalized();
-        return Color.fromVector3(new Color(N.x+1, N.y+1, N.z+1).multiply(0.5));
+        const N = r.at(t).subtract(new Vector3(0, 0, -1)).getNormalized();
+        return Color.fromVector3(new Color(N.x + 1, N.y + 1, N.z + 1).multiply(0.5));
     }
     const unit_direction = r.direction.getNormalized();
     t = 0.5 * (unit_direction.y + 1.0);
@@ -55,14 +55,14 @@ function rayColor(r: Ray): Color {
 
 function hit_sphere(center: Point3, radius: number, r: Ray) {
     const oc = r.origin.subtract(center);
-    const a = r.direction.dot(r.direction);
-    const b = 2.0 * oc.dot(r.direction);
-    const c = oc.dot(oc) - radius * radius;
-    const discriminant = b * b - 4 * a * c;
+    const a = r.direction.squaredLength();
+    const half_b = oc.dot(r.direction);
+    const c = oc.squaredLength() - radius * radius;
+    const discriminant = half_b * half_b - a * c;
     if (discriminant < 0) {
         return -1.0;
     } else {
-        return (-b - Math.sqrt(discriminant)) / (2.0 * a);
+        return (-half_b - Math.sqrt(discriminant)) / a;
     }
 }
 
