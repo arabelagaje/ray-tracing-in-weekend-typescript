@@ -1,19 +1,49 @@
 import * as fs from 'fs';
+import { Ray } from './src/Ray.js';
+import { Vector3 } from './src/Vector3.js';
 import { Color } from './src/Color.js';
+import { Point3 } from './src/Point3.js';
 
-const image_width = 256;
-const image_height = 256;
+const aspect_ratio = 16.0 / 9.0;
+const image_width = 400;
+const image_height = Math.floor(image_width / aspect_ratio);
+
+const viewport_height = 2.0;
+const viewport_width = aspect_ratio * viewport_height;
+const focal_length = 1.0;
+
+const origin = new Point3(0, 0, 0);
+const horizontal = new Vector3(viewport_width, 0, 0);
+const vertical = new Vector3(0, viewport_height, 0);
+//origin - horizontal/2 - vertical/2 - Vector3(0, 0, focal_length);
+const lower_left_corner = origin.subtract(horizontal.divide(2)).subtract(vertical.divide(2)).subtract(new Vector3(0, 0, focal_length));
+
 
 // Render
-let sData = "P3\n" + image_width + " " + image_height + "\n255\n";
+let imgData = "P3\n" + image_width + " " + image_height + "\n255\n";
 
 for (let j = image_height - 1; j >= 0; --j) {
     console.log("Scanlines remaining: ", j)
     for (let i = 0; i < image_width; ++i) {
-        let vec = new Color(i / (image_width - 1), j / (image_height - 1), 0.25)
-        vec.multiplyBy(255.999);
-       
-        sData += Math.floor(vec.r) + ' ' + Math.floor(vec.g) + ' ' + Math.floor(vec.b) + "\n";
+        const u = i / (image_width - 1);
+        const v = j / (image_height - 1);
+        //lower_left_corner + u*horizontal + v*vertical - origin
+        const r = new Ray(origin,
+            lower_left_corner.add(horizontal.multiply(u)).add(vertical.multiply(v)).subtract(origin));
+        const pixel_color = rayColor(r);
+
+        pixel_color.multiplyBy(255.999);
+        imgData += Math.floor(pixel_color.r) + ' ' + Math.floor(pixel_color.g) + ' ' + Math.floor(pixel_color.b) + "\n";
     }
 }
-fs.writeFileSync("./output/test.ppm", sData)
+
+function rayColor(r: Ray): Color {
+    const unit_direction = r.direction.getNormalized();
+    const t = 0.5 * (unit_direction.y + 1.0);
+    const startColor = new Color(1.0, 1.0, 1.0);
+    const endColor = new Color(0.5, 0.7, 1.0);
+    //(1.0-t) * startColor + t * endColor;
+    return Color.fromVector3(startColor.multiply(1-t).add(endColor.multiply(t)));
+}
+
+fs.writeFileSync("./output/test.ppm", imgData)
