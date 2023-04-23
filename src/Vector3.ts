@@ -79,4 +79,9 @@ export class Vector3 {
     squaredLength(): number {
         return (this._x * this._x) + (this._y * this._y) + (this._z * this._z);
     }
+
+    getNormalized(): Vector3 {
+        return this.divide(this.length());
+    }
+
 }
