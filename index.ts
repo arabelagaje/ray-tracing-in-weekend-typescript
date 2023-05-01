@@ -13,7 +13,9 @@ import { Dielectric } from './src/Material/Dielectric.js';
 
 console.time("Total time")
 
-const camera = new Camera();
+const R = Math.cos(Math.PI/4);
+
+const camera = new Camera(90);
 
 const aspect_ratio = 16.0 / 9.0;
 const image_width = 400;
@@ -25,13 +27,13 @@ const samplesPerPixel = 100;
 const world = new HitableList();
 
 let ground = new Sphere(new Point3(0, -100.5, -1), 100, new Lambertian(new Color(0.8, 0.8, 0.0)));
-let left = new Sphere(new Point3(-1, 0, -1), 0.5, new Dielectric(1.5));
+let left = new Sphere(new Point3(-R, 0, -1), R, new Lambertian(new Color(0,0,1)));
 let center = new Sphere(new Point3(0, 0, -1), 0.5,new Dielectric(1.5));
-let right = new Sphere(new Point3(1, 0, -1), 0.5, new Metal(new Color(0.8, 0.6, 0.2), 1.0));
+let right = new Sphere(new Point3(R, 0, -1), R, new Lambertian(new Color(1,0,0)));
 
-world.add(ground);
+// world.add(ground);
 world.add(left);
-world.add(center);
+// world.add(center);
 world.add(right);
 
 // Render
