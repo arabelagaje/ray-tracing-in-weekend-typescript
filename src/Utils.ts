@@ -8,4 +8,8 @@ export class Utils {
         if (x > max) return max;
         return x;
     }
+
+    static random(min, max) {
+        return min + (max - min) * Math.random();
+    }
 }

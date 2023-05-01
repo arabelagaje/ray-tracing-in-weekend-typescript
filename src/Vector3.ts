@@ -90,9 +90,25 @@ export class Vector3 {
         return (this._x * vector3.x) + (this._y * vector3.y) + (this._z * vector3.z);
     }
 
-    clamp(min:number, max:number){
-        this._x = Utils.clamp(this._x, 0, 0.9999)
-        this._y = Utils.clamp(this._y, 0, 0.9999)
-        this._z = Utils.clamp(this._z, 0, 0.9999)
+    clamp(min: number, max: number) {
+        this._x = Utils.clamp(this._x, min, max);
+        this._y = Utils.clamp(this._y, min, max);
+        this._z = Utils.clamp(this._z, min, max);
+    }
+
+    static random() {
+        return new Vector3(Math.random(), Math.random(), Math.random())
+    }
+
+    static randomRange(min: number, max: number) {
+        return new Vector3(Utils.random(min, max), Utils.random(min, max), Utils.random(min, max));
+    }
+
+    static randomInUnitSphere() {
+        while (true) {
+            const p = Vector3.randomRange(-1, 1);
+            if (p.squaredLength() >= 1) continue;
+            return p;
+        }
     }
 }

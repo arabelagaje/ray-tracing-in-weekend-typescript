@@ -15,6 +15,7 @@ const camera = new Camera();
 const aspect_ratio = 16.0 / 9.0;
 const image_width = 400;
 const image_height = Math.floor(image_width / aspect_ratio);
+const maxDepth = 50;
 
 const samplesPerPixel = 10;
 
@@ -33,18 +34,25 @@ for (let j = image_height - 1; j >= 0; --j) {
             const u = (i + Math.random()) / (image_width - 1);
             const v = (j + Math.random()) / (image_height - 1);
             const ray = camera.getRay(u, v);
-            pixel_color.addTo(rayColor(ray, world));
+            pixel_color.addTo(rayColor(ray, world, maxDepth));
         }
         pixel_color.divideBy(samplesPerPixel);
+        pixel_color.r = Math.sqrt(pixel_color.r)
+        pixel_color.g = Math.sqrt(pixel_color.g)
+        pixel_color.b = Math.sqrt(pixel_color.b)
         pixel_color.multiplyBy(255.999);
         imgData += Math.floor(pixel_color.r) + ' ' + Math.floor(pixel_color.g) + ' ' + Math.floor(pixel_color.b) + "\n";
     }
 }
 
-function rayColor(ray: Ray, world: Hitable): Color {
+function rayColor(ray: Ray, world: Hitable, depth:number): Color {
+    if(depth<0){
+        return new Color(0,0,0);
+    }
     const hitRecord = world.hit(ray, 0, Number.MAX_SAFE_INTEGER)
     if (hitRecord.isHit) {
-        return Color.fromVector3(hitRecord.normal.add(new Vector3(1, 1, 1)).multiply(0.5));
+        const target = hitRecord.point.add(hitRecord.normal).add(Vector3.randomInUnitSphere());
+        return Color.fromVector3(rayColor(new Ray(hitRecord.point, target.subtract(hitRecord.point)), world, depth-1).multiply(0.5));
     }
     const unit_direction = ray.direction.getNormalized();
     const t = 0.5 * (unit_direction.y + 1.0);
