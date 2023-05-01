@@ -27,7 +27,7 @@ const world = new HitableList();
 let ground = new Sphere(new Point3(0, -100.5, -1), 100, new Lambertian(new Color(0.8, 0.8, 0.0)));
 let left = new Sphere(new Point3(-1, 0, -1), 0.5, new Dielectric(1.5));
 let center = new Sphere(new Point3(0, 0, -1), 0.5,new Dielectric(1.5));
-let right = new Sphere(new Point3(1, 0, -1), 0.5, new Metal(new Color(0.8, 0.6, 0.2)));
+let right = new Sphere(new Point3(1, 0, -1), 0.5, new Metal(new Color(0.8, 0.6, 0.2), 1.0));
 
 world.add(ground);
 world.add(left);
