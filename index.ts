@@ -7,6 +7,8 @@ import { Hitable } from './src/Hitable.js';
 import { HitableList } from './src/HitableList.js';
 import { Sphere } from './src/Sphere.js';
 import { Camera } from './src/Camera.js';
+import { Lambertian } from './src/Material/Lambertian.js';
+import { Metal } from './src/Material/Metal.js';
 
 console.time("Total time")
 
@@ -20,8 +22,16 @@ const maxDepth = 50;
 const samplesPerPixel = 100;
 
 const world = new HitableList();
-world.add(new Sphere(new Point3(0, 0, -1), 0.5));
-world.add(new Sphere(new Point3(0, -100.5, -1), 100));
+
+let ground = new Sphere(new Point3(0, -100.5, -1), 100, new Lambertian(new Color(0.8, 0.8, 0.0)));
+let left = new Sphere(new Point3(-1, 0, -1), 0.5, new Metal(new Color(0.8, 0.8, 0.8)));
+let center = new Sphere(new Point3(0, 0, -1), 0.5, new Lambertian(new Color(0.7, 0.7, 0.3)));
+let right = new Sphere(new Point3(1, 0, -1), 0.5, new Metal(new Color(0.8, 0.6, 0.2)));
+
+world.add(ground);
+world.add(left);
+world.add(center);
+world.add(right);
 
 // Render
 let imgData = "P3\n" + image_width + " " + image_height + "\n255\n";
@@ -45,14 +55,19 @@ for (let j = image_height - 1; j >= 0; --j) {
     }
 }
 
-function rayColor(ray: Ray, world: Hitable, depth:number): Color {
-    if(depth<0){
-        return new Color(0,0,0);
+function rayColor(ray: Ray, world: Hitable, depth: number): Color {
+    if (depth < 0) {
+        return new Color(0, 0, 0);
     }
     const hitRecord = world.hit(ray, 0, Number.MAX_SAFE_INTEGER)
     if (hitRecord.isHit) {
-        const target = hitRecord.point.add(hitRecord.normal).add(Vector3.randomInUnitSphere());
-        return Color.fromVector3(rayColor(new Ray(hitRecord.point, target.subtract(hitRecord.point)), world, depth-1).multiply(0.5));
+        let record = hitRecord.material.scatter(ray, hitRecord)
+        if (record) {
+            const attenuation = record.attenuation;
+            const color = rayColor(record.scattered, world, depth - 1);
+            return new Color(attenuation.r * color.r, attenuation.g * color.g, attenuation.b * color.b);
+        }
+        return new Color(0, 0, 0);
     }
     const unit_direction = ray.direction.getNormalized();
     const t = 0.5 * (unit_direction.y + 1.0);

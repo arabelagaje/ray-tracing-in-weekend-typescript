@@ -111,4 +111,15 @@ export class Vector3 {
             return p;
         }
     }
+
+    nearZero(): boolean {
+        const s = 1e-8;
+        return (Math.abs(this._x) < s) && (Math.abs(this._y) < s) && (Math.abs(this._z) < s);
+    }
+
+    static reflect(v: Vector3, n: Vector3) {
+        var dotVN = v.dot(n);
+        return v.subtract(n.multiply(2 * dotVN))
+        // return n.multiply(2 * v.dot(n)).subtract(v);
+    }
 }

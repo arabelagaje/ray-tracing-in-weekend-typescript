@@ -1,9 +1,10 @@
 import { Hitable, HitRecord } from "./Hitable.js";
+import { Material } from "./Material/Material.js";
 import { Point3 } from "./Point3.js";
 import { Ray } from "./Ray.js";
 
 export class Sphere implements Hitable {
-    constructor(public center: Point3, public radius: number) {
+    constructor(public center: Point3, public radius: number, public material: Material) {
     }
 
 
@@ -29,7 +30,7 @@ export class Sphere implements Hitable {
         const point = ray.at(t);
         const out_normal = point.subtract(this.center).divide(this.radius);
 
-        const hitRecord =  new HitRecord(true, point, t);
+        const hitRecord = new HitRecord(true, point, t, this.material);
         hitRecord.set_face_normal(ray, out_normal);
 
         return hitRecord;
