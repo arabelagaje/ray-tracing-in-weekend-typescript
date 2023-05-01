@@ -9,6 +9,7 @@ import { Sphere } from './src/Sphere.js';
 import { Camera } from './src/Camera.js';
 import { Lambertian } from './src/Material/Lambertian.js';
 import { Metal } from './src/Material/Metal.js';
+import { Dielectric } from './src/Material/Dielectric.js';
 
 console.time("Total time")
 
@@ -24,8 +25,8 @@ const samplesPerPixel = 100;
 const world = new HitableList();
 
 let ground = new Sphere(new Point3(0, -100.5, -1), 100, new Lambertian(new Color(0.8, 0.8, 0.0)));
-let left = new Sphere(new Point3(-1, 0, -1), 0.5, new Metal(new Color(0.8, 0.8, 0.8)));
-let center = new Sphere(new Point3(0, 0, -1), 0.5, new Lambertian(new Color(0.7, 0.7, 0.3)));
+let left = new Sphere(new Point3(-1, 0, -1), 0.5, new Dielectric(1.5));
+let center = new Sphere(new Point3(0, 0, -1), 0.5, new Dielectric(1.5));
 let right = new Sphere(new Point3(1, 0, -1), 0.5, new Metal(new Color(0.8, 0.6, 0.2)));
 
 world.add(ground);

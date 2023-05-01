@@ -122,4 +122,11 @@ export class Vector3 {
         return v.subtract(n.multiply(2 * dotVN))
         // return n.multiply(2 * v.dot(n)).subtract(v);
     }
+
+    static refract(uv: Vector3, n: Vector3, etai_over_etat: number) {
+        const cos_theta = Math.min(uv.multiply(-1).dot(n), 1.0);
+        const r_out_perp =  uv.add(n.multiply(cos_theta)).multiply(etai_over_etat);
+        const r_out_parallel = n.multiply(-Math.sqrt(Math.abs(1.0 - r_out_perp.squaredLength())));
+        return r_out_perp.add(r_out_parallel);
+    }
 }
