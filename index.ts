@@ -17,7 +17,7 @@ const image_width = 400;
 const image_height = Math.floor(image_width / aspect_ratio);
 const maxDepth = 50;
 
-const samplesPerPixel = 10;
+const samplesPerPixel = 100;
 
 const world = new HitableList();
 world.add(new Sphere(new Point3(0, 0, -1), 0.5));
