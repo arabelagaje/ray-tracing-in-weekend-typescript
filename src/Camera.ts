@@ -30,10 +30,9 @@ export class Camera {
             .subtract(new Vector3(0, 0, focal_length));
     }
 
-    getRay(u:number, v:number):Ray {
-        return new Ray(this.origin,
-            this.lower_left_corner.add(this.horizontal.multiply(u))
-            .add(this.vertical.multiply(v))
-            .subtract(this.origin));
+    getRay(iU, iV) {
+        var vectorHPos = this.horizontal.multiply(iU);
+        var vectorVPos = this.vertical.multiply(iV);
+        return new Ray(this.origin, this.lower_left_corner.add(vectorHPos.add(vectorVPos)).subtract(this.origin));
     }
 }

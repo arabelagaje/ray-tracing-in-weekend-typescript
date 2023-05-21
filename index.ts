@@ -62,7 +62,7 @@ function rayColor(ray: Ray, world: Hitable, depth: number): Color {
     if (depth < 0) {
         return new Color(0, 0, 0);
     }
-    const hitRecord = world.hit(ray, 0, Number.MAX_SAFE_INTEGER)
+    const hitRecord = world.hit(ray, 0.001, Number.MAX_SAFE_INTEGER)
     if (hitRecord.isHit) {
         let record = hitRecord.material.scatter(ray, hitRecord)
         if (record) {
