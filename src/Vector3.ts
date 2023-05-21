@@ -90,6 +90,13 @@ export class Vector3 {
         return (this._x * vector3.x) + (this._y * vector3.y) + (this._z * vector3.z);
     }
 
+    cross(vector3d:Vector3) {
+        var x = this._y * vector3d.z - this._z * vector3d.y;
+        var y = this._z * vector3d.x - this._x * vector3d.z;
+        var z = this._x * vector3d.y - this._y * vector3d.x;
+        return new Vector3(x, y, z);
+    }
+
     clamp(min: number, max: number) {
         this._x = Utils.clamp(this._x, min, max);
         this._y = Utils.clamp(this._y, min, max);

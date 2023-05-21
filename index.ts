@@ -15,7 +15,7 @@ console.time("Total time")
 
 const R = Math.cos(Math.PI/4);
 
-const camera = new Camera(90);
+const camera = new Camera(new Point3(-2,2,1), new Point3(0,0,-1), new Vector3(0,1,0), 20);
 
 const aspect_ratio = 16.0 / 9.0;
 const image_width = 400;
@@ -27,13 +27,13 @@ const samplesPerPixel = 100;
 const world = new HitableList();
 
 let ground = new Sphere(new Point3(0, -100.5, -1), 100, new Lambertian(new Color(0.8, 0.8, 0.0)));
-let left = new Sphere(new Point3(-R, 0, -1), R, new Lambertian(new Color(0,0,1)));
-let center = new Sphere(new Point3(0, 0, -1), 0.5,new Dielectric(1.5));
-let right = new Sphere(new Point3(R, 0, -1), R, new Lambertian(new Color(1,0,0)));
+let left = new Sphere(new Point3(-R, 0, -1), R, new Dielectric(1.5));
+let center = new Sphere(new Point3(0, 0, -1), 0.5,new Lambertian(new Color(0.1,0.2,0.5)));
+let right = new Sphere(new Point3(R, 0, -1), R, new Metal(new Color(0.8,0.6,0.2), 0.0));
 
-// world.add(ground);
+world.add(ground);
 world.add(left);
-// world.add(center);
+world.add(center);
 world.add(right);
 
 // Render
