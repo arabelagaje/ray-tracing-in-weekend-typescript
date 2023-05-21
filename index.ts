@@ -10,6 +10,7 @@ import { Camera } from './src/Camera.js';
 import { Lambertian } from './src/Material/Lambertian.js';
 import { Metal } from './src/Material/Metal.js';
 import { Dielectric } from './src/Material/Dielectric.js';
+import { perPixel } from './src/rayColor.js';
 
 console.time("Total time")
 
@@ -26,7 +27,6 @@ const image_width = 400;
 const image_height = Math.floor(image_width / aspect_ratio);
 const maxDepth = 50;
 
-const samplesPerPixel = 100;
 
 const world = new HitableList();
 
@@ -46,18 +46,7 @@ let imgData = "P3\n" + image_width + " " + image_height + "\n255\n";
 for (let j = image_height - 1; j >= 0; --j) {
     console.log("Scanlines remaining: ", j)
     for (let i = 0; i < image_width; ++i) {
-        let pixel_color = new Color(0, 0, 0);
-        for (let s = 0; s < samplesPerPixel; s++) {
-            const u = (i + Math.random()) / (image_width - 1);
-            const v = (j + Math.random()) / (image_height - 1);
-            const ray = camera.getRay(u, v);
-            pixel_color.addTo(rayColor(ray, world, maxDepth));
-        }
-        pixel_color.divideBy(samplesPerPixel);
-        pixel_color.r = Math.sqrt(pixel_color.r)
-        pixel_color.g = Math.sqrt(pixel_color.g)
-        pixel_color.b = Math.sqrt(pixel_color.b)
-        pixel_color.multiplyBy(255.999);
+        let pixel_color = perPixel(i, j, camera, world, image_width, image_height)
         imgData += Math.floor(pixel_color.r) + ' ' + Math.floor(pixel_color.g) + ' ' + Math.floor(pixel_color.b) + "\n";
     }
 }
@@ -82,19 +71,6 @@ function rayColor(ray: Ray, world: Hitable, depth: number): Color {
     const endColor = new Color(0.5, 0.7, 1.0);
     //(1.0-t) * startColor + t * endColor;
     return Color.fromVector3(startColor.multiply(1 - t).add(endColor.multiply(t)));
-}
-
-function hit_sphere(center: Point3, radius: number, r: Ray) {
-    const oc = r.origin.subtract(center);
-    const a = r.direction.squaredLength();
-    const half_b = oc.dot(r.direction);
-    const c = oc.squaredLength() - radius * radius;
-    const discriminant = half_b * half_b - a * c;
-    if (discriminant < 0) {
-        return -1.0;
-    } else {
-        return (-half_b - Math.sqrt(discriminant)) / a;
-    }
 }
 
 fs.writeFileSync("./output/test.ppm", imgData)
