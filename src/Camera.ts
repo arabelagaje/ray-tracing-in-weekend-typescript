@@ -8,7 +8,11 @@ export class Camera {
     private lower_left_corner: Point3;
     private horizontal: Vector3;
     private vertical: Vector3;
-    constructor(lookFrom: Point3, lookAt: Point3, vup: Vector3, vfov: number) {
+    private lens_radius:number;
+    private w:Vector3;
+    private u:Vector3;
+    private v:Vector3;
+    constructor(lookFrom: Point3, lookAt: Point3, vup: Vector3, vfov: number, aperture: number, focus_dist: number) {
         const aspect_ratio = 16.0 / 9.0;
         const theta = Utils.degreesToRadians(vfov);
         const h = Math.tan(theta / 2);
@@ -19,23 +23,26 @@ export class Camera {
 
         // const viewport_height = 2.0;
         // const viewport_width = aspect_ratio * viewport_height;
-        const w = lookFrom.subtract(lookAt).getNormalized();
-        const u = vup.cross(w).getNormalized();
-        const v = w.cross(u);
+        this.w = lookFrom.subtract(lookAt).getNormalized();
+        this.u = vup.cross(this.w).getNormalized();
+        this.v = this.w.cross(this.u);
 
-
-        const focal_length = 1.0;
 
         this.origin = lookFrom;
-        this.horizontal = u.multiply(viewport_width);
-        this.vertical = v.multiply(viewport_height);
+        this.horizontal = this.u.multiply(viewport_width * focus_dist);
+        this.vertical = this.v.multiply(viewport_height * focus_dist);
         this.lower_left_corner = this.origin.subtract(this.horizontal.divide(2))
-            .subtract(this.vertical.divide(2)).subtract(w);
+            .subtract(this.vertical.divide(2)).subtract(this.w.multiply(focus_dist));
+            
+        this.lens_radius = aperture / 2;
     }
 
     getRay(iU, iV) {
+        const rd = Vector3.randomInUnitSphere().multiply(this.lens_radius);
+        const offset = this.u.multiply(rd.x).add(this.v.multiply(rd.y));
+
         var vectorHPos = this.horizontal.multiply(iU);
         var vectorVPos = this.vertical.multiply(iV);
-        return new Ray(this.origin, this.lower_left_corner.add(vectorHPos.add(vectorVPos)).subtract(this.origin));
+        return new Ray(this.origin.add(offset), this.lower_left_corner.add(vectorHPos.add(vectorVPos)).subtract(this.origin).subtract(offset));
     }
 }
