@@ -14,7 +14,6 @@ export class Metal implements Material {
         const reflected = Vector3.reflect(rayIn.direction.getNormalized(), record.normal);
         let scattered;
         if(this.fuzz<1e-8){
-            console.log("Test");
             scattered = new Ray(record.point, reflected);
         }
         else {
