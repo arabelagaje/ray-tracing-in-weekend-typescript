@@ -1,16 +1,16 @@
-import * as fs from 'fs';
-import { Ray } from './src/Ray.js';
+import { Worker } from 'worker_threads'
+import ESSerializer from 'esserializer';
 import { Vector3 } from './src/Vector3.js';
 import { Color } from './src/Color.js';
 import { Point3 } from './src/Point3.js';
-import { Hitable } from './src/Hitable.js';
 import { HitableList } from './src/HitableList.js';
 import { Sphere } from './src/Sphere.js';
 import { Camera } from './src/Camera.js';
 import { Lambertian } from './src/Material/Lambertian.js';
 import { Metal } from './src/Material/Metal.js';
 import { Dielectric } from './src/Material/Dielectric.js';
-import { perPixel } from './src/rayColor.js';
+import { Image } from './src/Image.js';
+import { Config } from './src/Config.js';
 
 console.time("Total time")
 
@@ -25,7 +25,6 @@ const camera = new Camera(lookFrom, lookAt, new Vector3(0, 1, 0), 20, 2, dist_to
 const aspect_ratio = 16.0 / 9.0;
 const image_width = 400;
 const image_height = Math.floor(image_width / aspect_ratio);
-const maxDepth = 50;
 
 
 const world = new HitableList();
@@ -40,39 +39,71 @@ world.add(left);
 world.add(center);
 world.add(right);
 
-// Render
-let imgData = "P3\n" + image_width + " " + image_height + "\n255\n";
+const image = new Image(image_width, image_height);
 
-for (let j = image_height - 1; j >= 0; --j) {
-    console.log("Scanlines remaining: ", j)
-    for (let i = 0; i < image_width; ++i) {
-        let pixel_color = perPixel(i, j, camera, world, image_width, image_height)
-        imgData += Math.floor(pixel_color.r) + ' ' + Math.floor(pixel_color.g) + ' ' + Math.floor(pixel_color.b) + "\n";
-    }
-}
 
-function rayColor(ray: Ray, world: Hitable, depth: number): Color {
-    if (depth < 0) {
-        return new Color(0, 0, 0);
-    }
-    const hitRecord = world.hit(ray, 0.001, Number.MAX_SAFE_INTEGER)
-    if (hitRecord.isHit) {
-        let record = hitRecord.material.scatter(ray, hitRecord)
-        if (record) {
-            const attenuation = record.attenuation;
-            const color = rayColor(record.scattered, world, depth - 1);
-            return new Color(attenuation.r * color.r, attenuation.g * color.g, attenuation.b * color.b);
+const camData = ESSerializer.serialize(camera)
+const worldData = ESSerializer.serialize(world)
+const workers: Array<Worker> = [];
+for (let i = 0; i < Config.workerCount; i++) {
+    const worker = new Worker("./dist/src/rayColor.js", {
+        workerData: {
+            image_width, image_height,
+            camera: camData,
+            world: worldData
         }
-        return new Color(0, 0, 0);
-    }
-    const unit_direction = ray.direction.getNormalized();
-    const t = 0.5 * (unit_direction.y + 1.0);
-    const startColor = new Color(1.0, 1.0, 1.0);
-    const endColor = new Color(0.5, 0.7, 1.0);
-    //(1.0-t) * startColor + t * endColor;
-    return Color.fromVector3(startColor.multiply(1 - t).add(endColor.multiply(t)));
+    })
+    workers.push(worker)
 }
 
-fs.writeFileSync("./output/test.ppm", imgData)
+function workerAbstract(row: number, column: number, workerIndex: number) {
+    return new Promise((resolve, reject) => {
+        workers[workerIndex].postMessage({ i: row, j: column })
+        workers[workerIndex].once('message', (data) => {
+            data.row = row;
+            data.column = column;
+            data.workerIndex = workerIndex;
+            resolve(data)
+        })
+    })
+}
 
-console.timeEnd("Total time")
+function main() {
+    let currentColumn = 0, currentRow = 0;
+    let completedWorkers = 0;
+
+    let callBackHandler = (data) => {
+        let pixel_color = new Color(data._x, data._y, data._z)
+        image.setColor(data.row, data.column, pixel_color);
+        currentColumn++;
+
+        if (currentColumn >= image_width) {
+            console.log("Scanlines completed: ", currentRow, " of ", image_height);
+            currentColumn = 0;
+            currentRow++;
+        }
+
+        if (currentRow >= image_height) {
+            workers[data.workerIndex].terminate();
+            completedWorkers++;
+            if (completedWorkers == Config.workerCount) {
+                image.savePPM();
+                console.timeEnd("Total time")
+            }
+            return;
+        }
+
+        workerAbstract(currentColumn, currentRow, data.workerIndex).then(callBackHandler)
+    }
+
+    for (let k = 0; k < Config.workerCount; k++) {
+        workerAbstract(currentColumn, currentRow, k).then(callBackHandler)
+        currentColumn++;
+        if (currentColumn >= image_width) {
+            currentColumn = 0;
+            currentRow++;
+        }
+    }
+
+}
+main();
