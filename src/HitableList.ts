@@ -1,5 +1,5 @@
 import { Hitable, HitRecord } from "./Hitable.js";
-import { Ray } from "./Ray";
+import { Ray } from "./Ray.js";
 
 export class HitableList implements Hitable {
     objects: Array<Hitable> = [];
