@@ -57,6 +57,12 @@ function workerAbstract(row: number, column: number, workerIndex: number) {
             data.workerIndex = workerIndex;
             resolve(data)
         })
+        // to debug without worker
+        // let pixel: any = perPixel(row, column, camera, world, image_width, image_height);
+        // pixel.row = row;
+        // pixel.column = column;
+        // pixel.workerIndex = workerIndex;
+        // resolve(pixel)
     })
 }
 

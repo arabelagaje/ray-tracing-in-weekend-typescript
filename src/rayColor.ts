@@ -1,4 +1,4 @@
-import { parentPort, workerData } from 'worker_threads'
+import { parentPort, workerData, isMainThread } from 'worker_threads'
 import ESSerializer from 'esserializer';
 import { Camera } from "./Camera.js";
 import { Color } from "./Color.js";
@@ -52,10 +52,12 @@ export function perPixel(i: number, j: number, camera: Camera, world: Hitable, i
     pixel_color.multiplyBy(255.999);
     return pixel_color;
 }
+if (!isMainThread) {
+    const camera = ESSerializer.deserialize(workerData.camera)
+    const world = ESSerializer.deserialize(workerData.world)
+    parentPort.on("message", (data) => {
+        let pixel_color = perPixel(data.i, data.j, camera, world, workerData.image_width, workerData.image_height)
+        parentPort.postMessage(pixel_color);
+    })
 
-const camera = ESSerializer.deserialize(workerData.camera)
-const world = ESSerializer.deserialize(workerData.world)
-parentPort.on("message", (data)=>{
-    let pixel_color = perPixel(data.i, data.j, camera, world, workerData.image_width, workerData.image_height)
-    parentPort.postMessage(pixel_color);
-})
+}
