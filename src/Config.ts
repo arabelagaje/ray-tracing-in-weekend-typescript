@@ -1,5 +1,5 @@
 export const Config =  {
-    samplesPerPixel : 100,
+    samplesPerPixel : 500,
     maxDepth: 50,
-    workerCount : 20
+    workerCount : 16
 }
