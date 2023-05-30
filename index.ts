@@ -89,7 +89,7 @@ function main() {
             workers[data.workerIndex].terminate();
             completedWorkers++;
             if (completedWorkers == Config.workerCount) {
-                image.savePPM();
+                image.savePNG();
                 console.timeEnd("Total time")
             }
             return;
