@@ -34,6 +34,9 @@ npm install
 npm start
 ```
 
+6. Wait for a long time to get the out put image (It took about 20 mins in my i7 12th gen laptop to get below image)
+![Image Output](sample/final.png)
+
 ## Additional Resources
 
 If you want to learn more about ray tracing or enhance the capabilities of this project, consider exploring the following resources:
